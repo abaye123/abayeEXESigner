@@ -1,0 +1,6 @@
+# Ignore the build directory
+build/
+dist/
+
+*.spec
+*.pfx
