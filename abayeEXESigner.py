@@ -57,28 +57,28 @@ def check_signatures(file_path):
 
 def sign_exe(file_path):
     """חתימת עותק של הקובץ הניתן להרצה."""
-    if not PASSWORD:
-        log_message("שגיאה: סיסמה לא נמצאה. בדוק את קובץ ה-.env")
-        return None
-
     base, ext = os.path.splitext(file_path)
     signed_file_path = f"{base}_signed{ext}"
     
     # יצירת עותק של הקובץ המקורי
     shutil.copy2(file_path, signed_file_path)
 
-    # פקודה לחתימת הקובץ הניתן להרצה
+    # בניית פקודה לחתימת הקובץ הניתן להרצה
     command = [
         SIGTOOL_PATH, 
         'sign', 
         '/f', CERT_PATH, 
-        '/p', PASSWORD, 
         '/fd', 'SHA256', 
         '/td', 'SHA256', 
         '/tr', TIMESTAMP_SERVER, 
         '/d', "Signed Executable",
         signed_file_path
     ]
+    
+    # הוספת פרמטר סיסמה רק אם קיימת סיסמה
+    if PASSWORD and PASSWORD.strip():
+        command.insert(4, '/p')  # הוספת פרמטר /p אחרי /f CERT_PATH
+        command.insert(5, PASSWORD)  # הוספת הסיסמה
 
     try:
         # הרצת פקודת signtool
