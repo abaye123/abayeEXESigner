@@ -16,7 +16,20 @@ import shutil
 import webbrowser
 import configparser
 
+try:
+    from tkinterdnd2 import TkinterDnD, DND_FILES
+    DND_AVAILABLE = True
+except ImportError:
+    DND_AVAILABLE = False
+
 load_dotenv()
+
+SUPPORTED_EXTENSIONS = ('.exe', '.dll')
+SUPPORTED_FILETYPES = [
+    ("Signable Files", "*.exe;*.dll"),
+    ("Executable Files", "*.exe"),
+    ("DLL Files", "*.dll"),
+]
 
 def get_script_directory():
     if getattr(sys, 'frozen', False):
@@ -238,7 +251,7 @@ def clear_log():
 
 def select_file_for_signing():
     global current_file
-    file_path = filedialog.askopenfilename(filetypes=[("Executable Files", "*.exe")])
+    file_path = filedialog.askopenfilename(filetypes=SUPPORTED_FILETYPES)
     if file_path:
         current_file = file_path
         is_signed = check_signatures(current_file)
@@ -247,9 +260,30 @@ def select_file_for_signing():
             sign_file()
 
 def select_file_for_checking():
-    file_path = filedialog.askopenfilename(filetypes=[("Executable Files", "*.exe")])
+    file_path = filedialog.askopenfilename(filetypes=SUPPORTED_FILETYPES)
     if file_path:
         check_signatures(file_path)
+
+def handle_dropped_file(file_path):
+    """טיפול בקובץ שנגרר לתוכנה"""
+    global current_file
+    if not file_path.lower().endswith(SUPPORTED_EXTENSIONS):
+        log_message(f"קובץ לא נתמך (רק EXE/DLL): {file_path}")
+        return
+    if not os.path.isfile(file_path):
+        log_message(f"הקובץ לא נמצא: {file_path}")
+        return
+    current_file = file_path
+    is_signed = check_signatures(current_file)
+    sign_anyway_button.configure(state='normal')
+    if not is_signed:
+        sign_file()
+
+def on_drop(event):
+    """מטפל באירוע גרירת קובץ לחלון"""
+    paths = app.tk.splitlist(event.data)
+    for path in paths:
+        handle_dropped_file(path)
 
 def sign_file():
     if current_file:
@@ -291,7 +325,16 @@ def on_config_change():
     save_config()
 
 # יצירת חלון ראשי
-app = ttk.Window(themename="darkly")
+if DND_AVAILABLE:
+    class DnDWindow(ttk.Window, TkinterDnD.DnDWrapper):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.TkdndVersion = TkinterDnD._require(self)
+
+    app = DnDWindow(themename="darkly")
+else:
+    app = ttk.Window(themename="darkly")
+
 app.title("EXE Signer")
 app.protocol("WM_DELETE_WINDOW", on_closing)
 
@@ -309,7 +352,7 @@ version_label = ttk.Label(header_frame, text="by abaye v1.3.0", font=("Helvetica
 version_label.pack()
 
 # מסגרת אפשרויות חתימה
-options_frame = ttk.LabelFrame(app, text="אפשרויות חתימה", padding=10)
+options_frame = ttk.Labelframe(app, text="אפשרויות חתימה", padding=10)
 options_frame.pack(pady=10, padx=20, fill='x')
 
 # בחירת מצב חתימה
@@ -357,7 +400,7 @@ auto_delete_backup_check.pack(anchor='w', padx=20)
 button_frame = ttk.Frame(app)
 button_frame.pack(pady=20)
 
-select_button = ttk.Button(button_frame, text="בחר קובץ EXE לחתימה", command=select_file_for_signing, style='primary.TButton')
+select_button = ttk.Button(button_frame, text="בחר קובץ לחתימה (EXE/DLL)", command=select_file_for_signing, style='primary.TButton')
 select_button.pack(side=tk.LEFT, padx=5)
 
 check_signatures_button = ttk.Button(button_frame, text="בדוק חתימות", command=select_file_for_checking, style='info.TButton')
@@ -369,9 +412,20 @@ sign_anyway_button.pack(side=tk.LEFT, padx=5)
 clear_log_button = ttk.Button(button_frame, text="נקה לוג", command=clear_log, style='secondary.TButton')
 clear_log_button.pack(side=tk.LEFT, padx=5)
 
+# רמז לגרירה
+if DND_AVAILABLE:
+    drop_hint = ttk.Label(app, text="או גרור קובץ EXE/DLL לחלון", font=("Helvetica", 9, "italic"))
+    drop_hint.pack(pady=(0, 5))
+
 # תיבת הלוג
 log_box = scrolledtext.ScrolledText(app, width=90, height=15, wrap=tk.WORD)
 log_box.pack(pady=20, padx=20, fill='both', expand=True)
+
+# הפעלת drag-and-drop על החלון ועל תיבת הלוג
+if DND_AVAILABLE:
+    for target in (app, log_box):
+        target.drop_target_register(DND_FILES)
+        target.dnd_bind('<<Drop>>', on_drop)
 
 # תחתית
 website_label = ttk.Label(app, text="abaye.co", cursor="hand2", font=("Helvetica", 10, "underline"))

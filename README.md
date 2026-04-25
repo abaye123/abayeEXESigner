@@ -8,11 +8,13 @@
 
 ### סקירה כללית
 
-abayeEXESigner הוא יישום GUI פשוט ואינטואיטיבי הכתוב בפייתון לחתימה דיגיטלית של קבצי EXE. התוכנה מספקת ממשק משתמש נוח לחתימת קבצים ניתנים להרצה באמצעות כלי SignTool של Microsoft, עם אפשרויות מתקדמות לניהול קבצים וחתימות.
+abayeEXESigner הוא יישום GUI פשוט ואינטואיטיבי הכתוב בפייתון לחתימה דיגיטלית של קבצי EXE ו-DLL. התוכנה מספקת ממשק משתמש נוח לחתימת קבצים באמצעות כלי SignTool של Microsoft, עם אפשרויות מתקדמות לניהול קבצים וחתימות.
 
 ### תכונות עיקריות
 
 - **ממשק משתמש גרפי** - ממשק נוח ואינטואיטיבי בעברית
+- **תמיכה ב-EXE ו-DLL** - חתימה על קבצי הרצה וספריות
+- **גרירה לחלון** - ניתן לגרור קובץ ישירות לתוכנה לחתימה מיידית
 - **מספר מצבי חתימה** - בחירה בין יצירת עותק, חתימה ישירה או החלפת קובץ
 - **בדיקת חתימות** - וידוא קיום חתימות דיגיטליות בקבצים
 - **מחיקה אוטומטית** - אפשרויות מחיקה אוטומטית של קבצים מקוריים או גיבויים
@@ -87,7 +89,7 @@ abayeEXESigner/
 1. הפעילו את התוכנה
 2. בחרו את מצב החתימה המועדף
 3. הגדירו אפשרויות מחיקה אוטומטית (אופציונלי)
-4. לחצו על "בחר קובץ EXE לחתימה"
+4. לחצו על "בחר קובץ לחתימה (EXE/DLL)" **או גררו קובץ ישירות לחלון התוכנה**
 5. בחרו את הקובץ הרצוי
 6. התוכנה תבדוק אוטומטית אם הקובץ כבר חתום
 7. אם הקובץ לא חתום - החתימה תתחיל אוטומטית
@@ -138,8 +140,10 @@ abayeEXESigner/
 #### דרישות
 
 ```bash
-pip install tkinter ttkbootstrap python-dotenv configparser
+pip install -r requirements.txt
 ```
+
+> הערה: גרירת קבצים לחלון מבוססת על הספרייה `tkinterdnd2`. אם היא לא מותקנת התוכנה תרוץ רגיל אך ללא תמיכה בגרירה.
 
 #### הרצה
 
@@ -170,11 +174,13 @@ pyinstaller --onefile --windowed abayeEXESigner.py
 
 ### Overview
 
-abayeEXESigner is a simple and intuitive Python GUI application for digitally signing EXE files. The software provides a user-friendly interface for signing executable files using Microsoft's SignTool, with advanced options for file and signature management.
+abayeEXESigner is a simple and intuitive Python GUI application for digitally signing EXE and DLL files. The software provides a user-friendly interface for signing files using Microsoft's SignTool, with advanced options for file and signature management.
 
 ### Key Features
 
 - **Graphical User Interface** - Easy-to-use, intuitive interface
+- **EXE & DLL support** - Sign both executables and libraries
+- **Drag & Drop** - Drop a file onto the window to sign it instantly
 - **Multiple Signing Modes** - Choose between creating copy, direct signing, or file replacement
 - **Signature Verification** - Verify existence of digital signatures in files
 - **Automatic Deletion** - Auto-delete options for original files or backups
@@ -249,7 +255,7 @@ abayeEXESigner/
 1. Launch the application
 2. Select preferred signing mode
 3. Configure auto-delete options (optional)
-4. Click "Select EXE File for Signing"
+4. Click "Select File for Signing (EXE/DLL)" **or drag a file directly onto the window**
 5. Choose desired file
 6. Software automatically checks if file is already signed
 7. If file is unsigned - signing starts automatically
@@ -300,8 +306,10 @@ Created automatically and saves:
 #### Requirements
 
 ```bash
-pip install tkinter ttkbootstrap python-dotenv configparser
+pip install -r requirements.txt
 ```
+
+> Note: Drag-and-drop relies on the `tkinterdnd2` package. If it isn't installed the app still runs, just without drag-and-drop support.
 
 #### Running
 

@@ -1,0 +1,3 @@
+ttkbootstrap
+python-dotenv
+tkinterdnd2
